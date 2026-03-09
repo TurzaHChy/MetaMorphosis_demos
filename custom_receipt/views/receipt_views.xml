@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <template id="report_bill_invoice_inherit" inherit_id="account.report_invoice_document">
+            <xpath expr="." position="replace">
+                <t t-call="web.external_layout">
+                    <t t-set="o" t-value="o.with_context(lang=lang)"/>
+                    <t t-set="print_date" t-value="datetime.datetime.now()"/>
+                    
+                    <div class="page" style="padding-top: 0px !important; margin-top: 3px !important; color: black !important; font-family: sans-serif;">
+                        
+                        <!-- Header / Title -->
+                        <div class="row">
+                            <div class="col-12 text-center">
+                                <h1 style="font-weight: bold; font-size: 28px; margin-bottom: 20px;">Invoice/Bill</h1>
+                            </div>
+                        </div>
+
+                        <!-- Top Info Sections -->
+                        <div class="row mt-2" style="font-size: 13px;">
+                            <!-- Left Column -->
+                            <div class="col-6">
+                                <div class="row">
+                                    <div class="col-5"><strong>Invoice No.:</strong></div>
+                                    <div class="col-7"><span t-field="o.name"/></div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-5"><strong>Customer Name :</strong></div>
+                                    <div class="col-7"><span t-field="o.partner_id.name"/></div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-5"><strong>Billing Address:</strong></div>
+                                    <div class="col-7">
+                                        <span t-field="o.partner_id.name"/><br/>
+                                        <span t-field="o.partner_id.street"/>
+                                    </div>
+                                </div>
+                                <br/>
+                                <div class="row">
+                                    <div class="col-5"><strong>Bangladesh Phone No. :</strong></div>
+                                    <div class="col-7"><span t-field="o.partner_id.phone"/></div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-5"><strong>Delivery Address :</strong></div>
+                                    <div class="col-7">
+                                        <span t-field="o.partner_shipping_id.name"/><br/>
+                                        <span t-field="o.partner_shipping_id.street"/>
+                                    </div>
+                                </div>
+                                <br/>
+                                <div class="row">
+                                    <div class="col-5"><strong>Bangladesh Phone No. :</strong></div>
+                                    <div class="col-7"><span t-field="o.partner_shipping_id.phone"/></div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-5"><strong>Delivery Date :</strong></div>
+                                    <div class="col-7"><span t-field="o.invoice_date"/></div>
+                                </div>
+                            </div>
+
+                            <!-- Right Column -->
+                            <div class="col-6">
+                                <div class="row">
+                                    <div class="col-6 text-right"><strong>Order No. / PO No.:</strong></div>
+                                    <div class="col-6">
+                                        <t t-set="orders" t-value="o.invoice_line_ids.mapped('sale_line_ids.order_id')"/>
+                                        <span t-esc="', '.join(orders.mapped('name'))"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6 text-right"><strong>Order Date:</strong></div>
+                                    <div class="col-6">
+                                        <t t-set="order_dates" t-value="o.invoice_line_ids.mapped('sale_line_ids.order_id.date_order')"/>
+                                        <span t-esc="', '.join([d.strftime('%Y-%m-%d') for d in order_dates if d])"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6 text-right"><strong>Name of Salesman:</strong></div>
+                                    <div class="col-6"><span t-field="o.user_id.name"/></div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6 text-right"><strong>Phone No.:</strong></div>
+                                    <div class="col-6"><span t-field="o.user_id.phone"/></div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6 text-right"><strong>Current Outstanding:</strong></div>
+                                    <div class="col-6"><span t-field="o.partner_id.credit"/></div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6 text-right"><strong>Delivery Warehouse:</strong></div>
+                                    <div class="col-6">
+                                        <t t-set="warehouses" t-value="o.invoice_line_ids.mapped('sale_line_ids.order_id.warehouse_id.name')"/>
+                                        <span t-esc="', '.join(sorted(set(filter(None, warehouses))))"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6 text-right"><strong>Delivered By:</strong></div>
+                                    <div class="col-6"><span t-field="o.user_id.name"/></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Main Table -->
+                        <table class="table table-bordered mt-4" style="border: 1px solid black !important; font-size: 11px; width: 100%;">
+                            <thead>
+                                <tr style="background-color: white;">
+                                    <th class="text-center" style="border: 1px solid black !important; vertical-align: middle;">SL. #</th>
+                                    <th class="text-center" style="border: 1px solid black !important; vertical-align: middle;">P. TYPE</th>
+                                    <th class="text-center" style="border: 1px solid black !important; vertical-align: middle;">PRODUCT DESCRIPTION</th>
+                                    <th class="text-center" style="border: 1px solid black !important; vertical-align: middle;">MRP (TK)</th>
+                                    <th class="text-center" style="border: 1px solid black !important; vertical-align: middle;">QTY PCS</th>
+                                    <th class="text-center" style="border: 1px solid black !important; vertical-align: middle;">COM%</th>
+                                    <th class="text-center" style="border: 1px solid black !important; vertical-align: middle;">GROSS VALUE (TK)</th>
+                                    <th class="text-center" style="border: 1px solid black !important; vertical-align: middle;">COM. AMOUNT. (TK)</th>
+                                    <th class="text-center" style="border: 1px solid black !important; vertical-align: middle;">N. VALUE (TK)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="total_net" t-value="0.0"/>
+                                <tr t-foreach="o.invoice_line_ids" t-as="line">
+                                    <td class="text-center" style="border: 1px solid black !important;"><span t-esc="line_index + 1"/></td>
+                                    <td class="text-center" style="border: 1px solid black !important;"><span t-field="line.product_id.categ_id.name"/></td>
+                                    <td style="border: 1px solid black !important;">
+                                        [<span t-field="line.product_id.default_code"/>] - <span t-field="line.product_id.name"/>
+                                    </td>
+                                    <td class="text-right" style="border: 1px solid black !important;"><span t-field="line.price_unit"/></td>
+                                    <td class="text-center" style="border: 1px solid black !important;"><span t-field="line.quantity"/></td>
+                                    <td class="text-center" style="border: 1px solid black !important;"><span t-field="line.discount"/></td>
+                                    <td class="text-right" style="border: 1px solid black !important;">
+                                        <t t-set="gross" t-value="line.price_unit * line.quantity"/>
+                                        <span t-esc="gross" t-options='{"widget": "float", "precision": 1}'/>
+                                    </td>
+                                    <td class="text-right" style="border: 1px solid black !important;">
+                                        <t t-set="comm" t-value="gross * (line.discount / 100.0)"/>
+                                        <span t-esc="comm" t-options='{"widget": "float", "precision": 2}'/>
+                                    </td>
+                                    <td class="text-right" style="border: 1px solid black !important;">
+                                        <t t-set="net" t-value="gross - comm"/>
+                                        <span t-esc="net" t-options='{"widget": "float", "precision": 1}'/>
+                                        <t t-set="total_net" t-value="total_net + net"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="8" class="text-center" style="border: 1px solid black !important;"><strong>Total</strong></td>
+                                    <td class="text-right" style="border: 1px solid black !important;">
+                                        <strong t-esc="total_net" t-options='{"widget": "float", "precision": 1}'/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Lower Text -->
+                        <div class="mt-2" style="font-size: 13px;">
+                            <strong>In word:</strong> <span t-esc="o.currency_id.amount_to_text(total_net)"/> 
+                            <br/>
+                            <strong>Printing Date:</strong> <span t-esc="print_date.strftime('%d-%m-%Y - %I:%M:%S %p')"/>
+                        </div>
+
+                        <!-- Signature Section -->
+                        <div class="row" style="margin-top: 50px;">
+                            <div class="col-4 text-center">
+                                <div style="border-top: 1px solid black; width: 70%; margin: 0 auto; margin-top: 50px;"></div>
+                                <strong>Prepared by</strong><br/>
+                                <div class="text-left" style="padding-left: 15%; font-size: 12px;">
+                                    Name:<br/>
+                                    Signature:
+                                </div>
+                            </div>
+                            <div class="col-4 text-center">
+                                <div style="border-top: 1px solid black; width: 70%; margin: 0 auto; margin-top: 50px;"></div>
+                                <strong>Checked by</strong><br/>
+                                <div class="text-left" style="padding-left: 15%; font-size: 12px;">
+                                    Name:<br/>
+                                    Signature:
+                                </div>
+                            </div>
+                            <div class="col-4 text-center">
+                                <div style="border-top: 1px solid black; width: 70%; margin: 0 auto; margin-top: 50px;"></div>
+                                <strong>Received by</strong><br/>
+                                <div class="text-left" style="padding-left: 15%; font-size: 12px;">
+                                    Name:<br/>
+                                    Signature:
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hidden hooks to satisfy other module XPaths (prevents ParseError) -->
+                        <div id="qrcode" style="display: none;"/>
+                        <p name="payment_communication" style="display: none;">
+                            <t t-if="o.partner_bank_id"/>
+                        </p>
+                    </div>
+                </t>
+            </xpath>
+        </template>
+    </data>
+</odoo>
