@@ -1,0 +1,11 @@
+{
+    "python.analysis.extraPaths": [
+        "/home/turza/odoo/version19",
+        "/home/turza/odoo/custom/test"
+    ],
+    "python.autoComplete.extraPaths": [
+        "/home/turza/odoo/version19",
+        "/home/turza/odoo/custom/test"
+    ],
+    "python.defaultInterpreterPath": "/home/turza/odoo/.venv/bin/python"
+}

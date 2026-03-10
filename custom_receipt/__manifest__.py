@@ -9,6 +9,8 @@
         'account',
         'account_edi_ubl_cii',  
         'sale',                 
+        'hr',
+        'sale_stock',
     ],
     'data': [
         'views/receipt_views.xml',

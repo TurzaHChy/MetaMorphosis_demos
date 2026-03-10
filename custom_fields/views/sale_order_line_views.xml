@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_order_form_inherit_arrival" model="ir.ui.view">
+        <field name="name">sale.order.form.arrival.field</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+
+            <!-- 1. Add Arrival column in the ORDER LINES LIST (table) -->
+            <xpath expr="//field[@name='order_line']/list/field[@name='product_uom_qty']" position="after">
+                <field name="arrival" optional="show" width="100px"/>
+                <field name="commission" optional="show" width="100px" string="Commission (%)"/>
+            </xpath>
+
+            <!-- 2. Add Arrival field in the per-line FORM POPUP (ordered_qty div, line 535) -->
+            <xpath expr="//field[@name='order_line']/form//div[@name='ordered_qty']" position="after">
+                <label for="arrival"/>
+                <div name="arrival_div">
+                    <field name="arrival" class="oe_inline"/>
+                </div>
+            </xpath>
+
+            <!-- 3. Add Commission field in the per-line FORM POPUP after arrival -->
+            <xpath expr="//field[@name='order_line']/form//div[@name='arrival_div']" position="after">
+                <label for="commission"/>
+                <div name="commission_div">
+                    <field name="commission" class="oe_inline"/> %
+                </div>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

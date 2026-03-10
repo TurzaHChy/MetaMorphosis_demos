@@ -6,6 +6,7 @@
                 <t t-call="web.external_layout">
                     <t t-set="o" t-value="o.with_context(lang=lang)"/>
                     <t t-set="print_date" t-value="datetime.datetime.now()"/>
+                    
                     <div class="page" style="padding-top: 0px !important; margin-top: 3px !important; color: black !important; font-family: sans-serif;">
                         
                         <!-- Header / Title -->
@@ -49,7 +50,7 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-5"><strong>Delivery Date :</strong></div>
-                                    <div class="col-7"><span t-field="o.invoice_date"/></div>
+                                    <div class="col-7"><span t-field="o.delivery_date"/></div>
                                 </div>
                             </div>
 
@@ -57,19 +58,25 @@
                             <div class="col-6">
                                 <div class="row">
                                     <div class="col-6 text-right"><strong>Order No. / PO No.:</strong></div>
-                                    <div class="col-6"><span t-field="o.invoice_origin"/></div>
+                                    <div class="col-6">
+                                        <t t-set="orders" t-value="o.invoice_line_ids.mapped('sale_line_ids.order_id')"/>
+                                        <span t-esc="', '.join(orders.mapped('name'))"/>
+                                    </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-6 text-right"><strong>Order Date:</strong></div>
-                                    <div class="col-6"><span t-field="o.invoice_date"/></div>
+                                    <div class="col-6">
+                                        <t t-set="order_dates" t-value="o.invoice_line_ids.mapped('sale_line_ids.order_id.date_order')"/>
+                                        <span t-esc="', '.join([d.strftime('%Y-%m-%d') for d in order_dates if d])"/>
+                                    </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-6 text-right"><strong>Name of Salesman:</strong></div>
-                                    <div class="col-6"><span t-field="o.user_id.name"/></div>
+                                    <div class="col-6"><span t-field="o.employee_id.name"/></div>
                                 </div>
                                 <div class="row">
                                     <div class="col-6 text-right"><strong>Phone No.:</strong></div>
-                                    <div class="col-6"><span t-field="o.user_id.partner_id.phone"/></div>
+                                    <div class="col-6"><span t-field="o.employee_id.work_phone or o.user_id.partner_id.phone"/></div>
                                 </div>
                                 <div class="row">
                                     <div class="col-6 text-right"><strong>Current Outstanding:</strong></div>
@@ -78,12 +85,13 @@
                                 <div class="row">
                                     <div class="col-6 text-right"><strong>Delivery Warehouse:</strong></div>
                                     <div class="col-6">
-                                        <span>Classic Mart</span>
+                                        <t t-set="warehouses" t-value="o.invoice_line_ids.mapped('sale_line_ids.order_id.warehouse_id.name')"/>
+                                        <span t-esc="', '.join(sorted(set(filter(None, warehouses))))"/>
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-6 text-right"><strong>Delivered By:</strong></div>
-                                    <div class="col-6"><span t-field="o.user_id.name"/></div>
+                                    <div class="col-6"><span t-field="o.delivered_by.name"/></div>
                                 </div>
                             </div>
                         </div>
@@ -92,25 +100,28 @@
                         <table class="table table-bordered mt-4" style="border: 1px solid black !important; font-size: 11px; width: 100%;">
                             <thead>
                                 <tr style="background-color: white;">
-                                    <th class="text-center" style="border: 1px solid black !important;">SL. #</th>
-                                    <th class="text-center" style="border: 1px solid black !important;">P. TYPE</th>
-                                    <th class="text-center" style="border: 1px solid black !important;">PRODUCT DESCRIPTION</th>
-                                    <th class="text-center" style="border: 1px solid black !important;">MRP (TK)</th>
-                                    <th class="text-center" style="border: 1px solid black !important;">QTY PCS</th>
-                                    <th class="text-center" style="border: 1px solid black !important;">COM%</th>
-                                    <th class="text-center" style="border: 1px solid black !important;">GROSS VALUE (TK)</th>
-                                    <th class="text-center" style="border: 1px solid black !important;">COM. AMOUNT. (TK)</th>
-                                    <th class="text-center" style="border: 1px solid black !important;">N. VALUE (TK)</th>
+                                    <th class="text-center" style="border: 1px solid black !important; vertical-align: middle;">SL. #</th>
+                                    <th class="text-center" style="border: 1px solid black !important; vertical-align: middle;">P. TYPE</th>
+                                    <th class="text-center" style="border: 1px solid black !important; vertical-align: middle;">PRODUCT DESCRIPTION</th>
+                                    <th class="text-center" style="border: 1px solid black !important; vertical-align: middle;">VENDOR</th>
+                                    <th class="text-center" style="border: 1px solid black !important; vertical-align: middle;">MRP (TK)</th>
+                                    <th class="text-center" style="border: 1px solid black !important; vertical-align: middle;">QTY PCS</th>
+                                    <th class="text-center" style="border: 1px solid black !important; vertical-align: middle;">COM%</th>
+                                    <th class="text-center" style="border: 1px solid black !important; vertical-align: middle;">GROSS VALUE (TK)</th>
+                                    <th class="text-center" style="border: 1px solid black !important; vertical-align: middle;">COM. AMOUNT. (TK)</th>
+                                    <th class="text-center" style="border: 1px solid black !important; vertical-align: middle;">N. VALUE (TK)</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <t t-set="sl_no" t-value="1"/>
                                 <t t-set="total_net" t-value="0.0"/>
                                 <tr t-foreach="o.invoice_line_ids" t-as="line">
-                                    <td class="text-center" style="border: 1px solid black !important;"><span t-esc="sl_no"/><t t-set="sl_no" t-value="sl_no + 1"/></td>
+                                    <td class="text-center" style="border: 1px solid black !important;"><span t-esc="line_index + 1"/></td>
                                     <td class="text-center" style="border: 1px solid black !important;"><span t-field="line.product_id.categ_id.name"/></td>
                                     <td style="border: 1px solid black !important;">
-                                        <span t-field="line.product_id.name"/>
+                                        <span t-field="line.name"/>
+                                    </td>
+                                    <td style="border: 1px solid black !important;">
+                                        <span t-field="line.vendor_id.name"/>
                                     </td>
                                     <td class="text-right" style="border: 1px solid black !important;"><span t-field="line.price_unit"/></td>
                                     <td class="text-center" style="border: 1px solid black !important;"><span t-field="line.quantity"/></td>
@@ -124,13 +135,13 @@
                                         <span t-esc="'%.2f' % comm"/>
                                     </td>
                                     <td class="text-right" style="border: 1px solid black !important;">
-                                        <t t-set="net" t-value="line.price_subtotal"/>
+                                        <t t-set="net" t-value="gross - comm - (line.additional_discount or 0.0)"/>
                                         <span t-esc="'%.1f' % net"/>
                                         <t t-set="total_net" t-value="total_net + net"/>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td colspan="8" class="text-center" style="border: 1px solid black !important;"><strong>Total</strong></td>
+                                    <td colspan="9" class="text-center" style="border: 1px solid black !important;"><strong>Total</strong></td>
                                     <td class="text-right" style="border: 1px solid black !important;">
                                         <strong t-esc="'%.1f' % total_net"/>
                                     </td>
@@ -140,8 +151,12 @@
 
                         <!-- Amount in Words -->
                         <div class="mt-2" style="font-size: 13px;">
-                            <strong>In word:</strong> <span t-esc="o.currency_id.amount_to_text(total_net)"/>
+                            <strong>In word:</strong> <span t-esc="o.number_to_words(total_net)"/> 
                             <br/>
+                            <t t-if="o.receipt_note">
+                                <strong>Note:</strong> <span t-field="o.receipt_note"/>
+                                <br/>
+                            </t>
                             <strong>Printing Date:</strong> <span t-esc="print_date.strftime('%d-%m-%Y - %I:%M:%S %p')"/>
                         </div>
 
@@ -176,5 +191,24 @@
                 </t>
             </xpath>
         </template>
+        
+        <!-- Field in Invoice Form -->
+        <record id="view_move_form_inherit_receipt_note" model="ir.ui.view">
+            <field name="name">account.move.form.inherit.receipt.note</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='invoice_date'][last()]" position="after">
+                    <field name="delivery_date" invisible="0" readonly="state != 'draft'"/>
+                    <field name="employee_id"/>
+                    <field name="delivered_by"/>
+                    <field name="receipt_note" placeholder="Add a note for the receipt..."/>
+                </xpath>
+                <xpath expr="//field[@name='invoice_line_ids']/list/field[@name='quantity']" position="after">
+                    <field name="vendor_id"/>
+                    <field name="additional_discount"/>
+                </xpath>
+            </field>
+        </record>
     </data>
 </odoo>
